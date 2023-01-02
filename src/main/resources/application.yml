@@ -1,0 +1,20 @@
+server:
+  port: 8088
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: 'jdbc:mysql://rm-2vc0319r4esx4w7l71o.mysql.cn-chengdu.rds.aliyuncs.com:3306/reggie'
+    username: lisang
+    password: Cola00000
+    type: com.alibaba.druid.pool.DruidDataSource
+  web:
+    resources:
+      static-locations: classpath:/reggie
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    global-config:
+      db-config:
+        id-type: ASSIGN_ID
+file-save:
+  path: /Users/lisang/Documents/imgs/
