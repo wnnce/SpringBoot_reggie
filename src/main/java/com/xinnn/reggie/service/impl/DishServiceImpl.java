@@ -11,6 +11,7 @@ import com.xinnn.reggie.pojo.Dish;
 import com.xinnn.reggie.pojo.DishFlavor;
 import com.xinnn.reggie.service.DishFlavorService;
 import com.xinnn.reggie.service.DishService;
+import com.xinnn.reggie.utils.RedisUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     private CategoryMapper categoryMapper;
     @Autowired
     private DishFlavorService dishFlavorService;
+    @Autowired
+    private RedisUtil redisUtil;
     @Override
     public Page<DishDTO> getDishPage(Integer page, Integer pageSize, String name) {
         Page<Dish> dishPage = new Page<>(page, pageSize);
@@ -54,6 +57,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             dishFlavor.setDishId(dishDTO.getId());
             dishFlavorService.save(dishFlavor);
         }
+        //删除redis中的缓存
+        redisUtil.remove(RedisUtil.REGGIE_KEY + "DISH:" + dishDTO.getCategoryId() + ":1");
     }
 
     @Override
@@ -82,6 +87,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             dishFlavor.setDishId(dishDTO.getId());
             dishFlavorService.save(dishFlavor);
         }
+        //删除redis中的缓存
+        redisUtil.remove(RedisUtil.REGGIE_KEY + "DISH:" + dishDTO.getCategoryId() + ":1");
     }
 
     @Override
@@ -89,6 +96,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     public void updateDishStatus(List<String> ids, Integer type) {
         for (String id : ids){
             Long dishId = Long.parseLong(id);
+            //删除redis中的缓存
+            Dish dish = this.getById(dishId);
+            redisUtil.remove(RedisUtil.REGGIE_KEY + "DISH:" + dish.getCategoryId() + ":1");
             LambdaUpdateWrapper<Dish> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
             lambdaUpdateWrapper.set(Dish::getStatus, type).eq(Dish::getId, dishId);
             this.update(lambdaUpdateWrapper);
@@ -100,6 +110,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     public void deleteDish(List<String> ids) {
         for (String id : ids){
             Long dishId = Long.parseLong(id);
+            //删除redis中的缓存
+            Dish dish = this.getById(dishId);
+            redisUtil.remove(RedisUtil.REGGIE_KEY + "DISH:" + dish.getCategoryId() + ":1");
             LambdaQueryWrapper<DishFlavor> dishFlavorQueryWrapper = new LambdaQueryWrapper<>();
             dishFlavorQueryWrapper.eq(DishFlavor::getDishId, dishId);
             dishFlavorService.remove(dishFlavorQueryWrapper);
@@ -117,10 +130,18 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Override
     public List<DishDTO> getDishListByCategoryId(Long categoryId, Integer status) {
+        List<DishDTO> dishDTOList = null;
+        //先从缓存中获取
+        String key = RedisUtil.REGGIE_KEY + "DISH:" + categoryId + ":" + status;
+        dishDTOList = (List<DishDTO>) redisUtil.get(key);
+        if (dishDTOList != null){
+            return dishDTOList;
+        }
+
         LambdaQueryWrapper<Dish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Dish::getCategoryId, categoryId).eq(Dish::getStatus, status);
         List<Dish> dishList = this.list(lambdaQueryWrapper);
-        List<DishDTO> dishDTOList = new ArrayList<>();
+        dishDTOList = new ArrayList<>();
         for(Dish dish : dishList){
             DishDTO dishDTO = new DishDTO();
             BeanUtils.copyProperties(dish, dishDTO);
@@ -130,6 +151,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             dishDTO.setFlavors(flavors);
             dishDTOList.add(dishDTO);
         }
+        //将列表放到缓存里面
+        redisUtil.set(key, dishDTOList, 60);
         return dishDTOList;
     }
 }

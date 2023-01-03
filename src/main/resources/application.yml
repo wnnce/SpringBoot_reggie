@@ -10,6 +10,11 @@ spring:
   web:
     resources:
       static-locations: classpath:/reggie
+  redis:
+    database: 0
+    port: 6379
+    password: 00000...
+    host: 120.46.151.166
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
