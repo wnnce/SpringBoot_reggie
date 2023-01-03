@@ -13,6 +13,9 @@ import com.xinnn.reggie.service.ComboDishService;
 import com.xinnn.reggie.service.ComboService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +23,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@CacheConfig(cacheNames = "REGGIE:COMBO:")
 public class ComboServiceImpl extends ServiceImpl<ComboMapper, Combo> implements ComboService {
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
     private ComboDishService comboDishService;
+    @Autowired
+    private ComboMapper comboMapper;
     @Override
     public Page<ComboDTO> getComboPage(Integer page, Integer pageSize, String name) {
         Page<Combo> comboPage = new Page<>(page, pageSize);
@@ -47,6 +53,7 @@ public class ComboServiceImpl extends ServiceImpl<ComboMapper, Combo> implements
 
     @Override
     @Transactional
+    @CacheEvict(key = "#comboDTO.getCategoryId() + ':1'")
     public void addCombo(ComboDTO comboDTO) {
         this.save(comboDTO);
         List<ComboDish> comboDishList = comboDTO.getSetmealDishes();
@@ -74,6 +81,7 @@ public class ComboServiceImpl extends ServiceImpl<ComboMapper, Combo> implements
 
     @Override
     @Transactional
+    @CacheEvict(key = "#comboDTO.getCategoryId() + ':1'")
     public void updateCombo(ComboDTO comboDTO) {
         this.updateById(comboDTO);
         LambdaQueryWrapper<ComboDish> comboDishWrapper = new LambdaQueryWrapper<>();
@@ -88,28 +96,30 @@ public class ComboServiceImpl extends ServiceImpl<ComboMapper, Combo> implements
 
     @Override
     @Transactional
-    public void updateComboStatus(List<String> ids, Integer status) {
-        for(String id : ids){
-            Long comboId = Long.parseLong(id);
-            LambdaUpdateWrapper<Combo> comboUpdateWrapper = new LambdaUpdateWrapper<>();
-            comboUpdateWrapper.set(Combo::getStatus, status).eq(Combo::getId, comboId);
-            this.update(comboUpdateWrapper);
-        }
+    @CacheEvict(key = "#result + ':1'")
+    public Long updateComboStatus(String id, Integer status) {
+        Long comboId = Long.parseLong(id);
+        LambdaUpdateWrapper<Combo> comboUpdateWrapper = new LambdaUpdateWrapper<>();
+        comboUpdateWrapper.set(Combo::getStatus, status).eq(Combo::getId, comboId);
+        this.update(comboUpdateWrapper);
+        return comboMapper.getCategoryIdById(comboId);
     }
 
     @Override
     @Transactional
-    public void deleteCombo(List<String> ids) {
-        for(String id : ids){
-            Long comboId = Long.parseLong(id);
-            LambdaQueryWrapper<ComboDish> comboDishWrapper = new LambdaQueryWrapper<>();
-            comboDishWrapper.eq(ComboDish::getSetmealId, comboId);
-            comboDishService.remove(comboDishWrapper);
-            this.removeById(id);
-        }
+    @CacheEvict(key = "#result + ':1'")
+    public Long deleteCombo(String id) {
+        Long comboId = Long.parseLong(id);
+        LambdaQueryWrapper<ComboDish> comboDishWrapper = new LambdaQueryWrapper<>();
+        comboDishWrapper.eq(ComboDish::getSetmealId, comboId);
+        Long categoryId = comboMapper.getCategoryIdById(comboId);
+        comboDishService.remove(comboDishWrapper);
+        this.removeById(id);
+        return categoryId;
     }
 
     @Override
+    @Cacheable(key = "#categoryId + ':' + #status", unless = "#result == null")
     public List<Combo> getComboListByCategoryId(Long categoryId, Integer status) {
         LambdaQueryWrapper<Combo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Combo::getCategoryId, categoryId)

@@ -39,13 +39,17 @@ public class ComboController {
     @PostMapping("/status/{status}")
     public Result<String> updateStatus(@PathVariable("status") Integer status, @RequestParam("ids")String comboIds){
         List<String> ids = StringUtil.splitString(comboIds, ",");
-        comboService.updateComboStatus(ids, status);
+        for(String id : ids){
+            comboService.updateComboStatus(id, status);
+        }
         return Result.success("更新成功");
     }
     @DeleteMapping
     public Result<String> deleteCombo(@RequestParam("ids")String comboIds){
         List<String> ids = StringUtil.splitString(comboIds, ",");
-        comboService.deleteCombo(ids);
+        for (String id : ids){
+            comboService.deleteCombo(id);
+        }
         return Result.success("删除成功");
     }
     @GetMapping("/list")

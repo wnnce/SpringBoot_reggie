@@ -15,6 +15,9 @@ spring:
     port: 6379
     password: 00000...
     host: 120.46.151.166
+  cache:
+    redis:
+      time-to-live: 3600000
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
