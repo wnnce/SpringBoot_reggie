@@ -1,12 +1,37 @@
 server:
   port: 8088
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: 'jdbc:mysql://rm-2vc0319r4esx4w7l71o.mysql.cn-chengdu.rds.aliyuncs.com:3306/reggie'
-    username: lisang
-    password: Cola00000
-    type: com.alibaba.druid.pool.DruidDataSource
+  main:
+    allow-bean-definition-overriding: true
+  shardingsphere:
+    datasource:
+      names: master,slave
+      master:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: 'jdbc:mysql://10.10.10.120:3307/reggie'
+        username: root
+        password: admin
+      slave:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: 'jdbc:mysql://10.10.10.120:3308/reggie'
+        username: root
+        password: admin
+    props:
+      sql-show: true
+    rules:
+      readwrite-splitting:
+        load-balancers:
+          round-robin:
+            type: ROUND_ROBIN
+        data-sources:
+          ms:
+            static-strategy:
+              write-data-source-name: master
+              read-data-source-names:
+                - slave
+            load-balancer-name: round-robin
   web:
     resources:
       static-locations: classpath:/reggie
