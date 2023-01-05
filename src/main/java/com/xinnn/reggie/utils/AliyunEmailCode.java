@@ -7,6 +7,9 @@ import com.aliyun.teaopenapi.models.Config;
 import com.aliyun.teautil.Common;
 import com.aliyun.teautil.models.RuntimeOptions;
 
+/**
+ * 阿里云邮件推送
+ */
 public class AliyunEmailCode {
     private static final String accessKeyId = "LTAI5t9ivLkyxRSqF8rLo1J3";
     private static final String accessKeySecret = "xEEvK3UWFNrb8tW5FdvbzuGdfDWFkg";

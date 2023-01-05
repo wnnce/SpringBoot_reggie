@@ -5,12 +5,18 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 返回数据类
+ * @param <T>
+ */
 @Data
 public class Result <T>{
+    //状态码
     private Integer code;
+    //返回消息
     private String msg;
+    //返回数据
     private T data;
-    private Map<String, Object> map = new HashMap<>();
     public static <T> Result<T> success(T data){
         Result<T> result = new Result<>();
         result.setCode(1);

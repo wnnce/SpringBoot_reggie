@@ -21,6 +21,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * bean配置类
+ */
 @Configuration
 public class BeanConfig {
 
@@ -48,6 +51,7 @@ public class BeanConfig {
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory factory){
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(factory);
+        //设置redis key到序列化器 方便数据库的可读性
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         return redisTemplate;
     }

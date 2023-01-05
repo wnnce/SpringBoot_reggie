@@ -21,6 +21,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return pageInfo;
     }
 
+    /**
+     * 根据员工名称获取员工信息
+     * @param username
+     * @return
+     */
     @Override
     public Employee getEmployeeByUserName(String username) {
         LambdaQueryWrapper<Employee> lambdaQueryWrapper = new LambdaQueryWrapper<>();

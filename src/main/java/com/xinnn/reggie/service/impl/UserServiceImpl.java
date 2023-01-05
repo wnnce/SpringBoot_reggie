@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+    /**
+     * 根据邮箱获取用户 判断是否注册
+     * @param phone
+     * @return
+     */
     @Override
     public User getUserByPhone(String phone) {
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();

@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 封装查询参数
+ */
 @Data
 public class QueryDTO {
     private Long userId;

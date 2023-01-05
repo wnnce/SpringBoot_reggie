@@ -16,7 +16,7 @@ public class OrdersDTO extends Orders {
     private String address;
 
     private String consignee;
-
+    //订单中的订单详细信息
     private List<OrderDetail> orderDetails;
 	
 }

@@ -9,6 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+/**
+ * 用户登陆拦截器
+ */
 @ControllerAdvice
 public class UserLoginInterceptor implements HandlerInterceptor {
     @Override
@@ -16,6 +19,7 @@ public class UserLoginInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession();
         if(session.getAttribute("user") != null){
             Long id = (Long) session.getAttribute("user");
+            //在本地线程中设置用户id
             BaseContext.setCurrentUserId(id);
             return true;
         }

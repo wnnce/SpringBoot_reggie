@@ -12,17 +12,26 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * webmvc配置类
+ */
 @Configuration
 @Slf4j
 public class MyWebMvcConfig implements WebMvcConfigurer {
+    /**
+     * 配置拦截器
+     * @param registry
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         EmployeeLoginInterceptor loginCheckInterceptor = new EmployeeLoginInterceptor();
         UserLoginInterceptor userLoginInterceptor = new UserLoginInterceptor();
+        //员工登陆拦截器配置
         registry.addInterceptor(loginCheckInterceptor)
                 .addPathPatterns("/employee/**", "/dish/**", "/setmeal/**", "/category/**", "/order/**")
                 .excludePathPatterns("/employee/login", "/dish/list", "/setmeal/list",
                         "/category/list", "/order/submit", "/order/userPage");
+        //用户登陆拦截器配置
         registry.addInterceptor(userLoginInterceptor)
                 .addPathPatterns("/user/**", "/addressBook/**", "/shoppingCart/**", "/order/submit", "/order/userPage")
                 .excludePathPatterns("/user/login", "/user/sendMsg");

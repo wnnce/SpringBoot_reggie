@@ -14,12 +14,23 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.UUID;
 
+/**
+ * 文件上传和下载
+ */
 @RestController
 @RequestMapping("/file")
 @Data
+//配置文件绑定
 @ConfigurationProperties(prefix = "file-save")
 public class FileController {
     private String path;
+
+    /**
+     * 上传文件
+     * @param file
+     * @return
+     * @throws IOException
+     */
     @PostMapping("/upload")
     public Result<String> fileUpload(MultipartFile file) throws IOException {
         String name = file.getOriginalFilename();
@@ -29,6 +40,12 @@ public class FileController {
         file.transferTo(file1);
         return Result.success(name);
     }
+
+    /**
+     * 文件下载
+     * @param name
+     * @param response
+     */
     @GetMapping("/download")
     public void fileDownload(String name, HttpServletResponse response){
         try{

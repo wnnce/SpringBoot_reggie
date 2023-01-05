@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- * 登陆拦截器
+ * 员工登陆拦截器
  */
 @Slf4j
 public class EmployeeLoginInterceptor implements HandlerInterceptor {
@@ -20,6 +20,7 @@ public class EmployeeLoginInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession();
         if(session.getAttribute("employee") != null){
             Long id = (Long) session.getAttribute("employee");
+            //在本地线程中设置员工id
             BaseContext.setCurrentUserId(id);
             return true;
         }

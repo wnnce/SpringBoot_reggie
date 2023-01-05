@@ -24,29 +24,41 @@ public class UserController {
     private UserService userService;
     @Autowired
     private RedisUtil redisUtil;
+
+    /**
+     * 阿里云发送邮箱验证码
+     * @param map 获取前端传过来的email地址
+     * @return 返回验证码发送状态
+     */
     @PostMapping("/sendMsg")
-    public Result<String> sendMsg(@RequestBody Map<String, Object> map, HttpSession session){
+    public Result<String> sendMsg(@RequestBody Map<String, Object> map){
         String email = (String) map.get("email");
         String code = StringUtil.makeCode();
         if (email != null){
-            /*
             try{
                 //阿里云发送邮箱验证码
                 AliyunEmailCode.main(email, code);
             }catch (Exception e){
                 e.printStackTrace();
             }
+            /*
             将验证码保存到session
             session.setAttribute(email, code);
              */
             //将验证码保存到redis 设置过期时间5分钟
             String key = RedisUtil.REGGIE_KEY + email;
             redisUtil.set(key, code, 5);
-            log.info(code);
             return Result.success("发送验证码成功！");
         }
         return Result.error("发送验证码失败！");
     }
+
+    /**
+     * 移动端用户登陆方法
+     * @param map 获取用户的email地址和验证码
+     * @param session 保存用户信息
+     * @return
+     */
     @PostMapping("/login")
     public Result<User> login(@RequestBody Map<String, Object> map, HttpSession session){
         String email = (String) map.get("phone");
@@ -62,6 +74,7 @@ public class UserController {
         }
         User user = userService.getUserByPhone(email);
         if (user == null){
+            //如果数据库中没有此用户 那么就将该用户添加到数据库
             user = new User();
             user.setPhone(email);
             user.setStatus(1);
@@ -74,6 +87,12 @@ public class UserController {
         session.setAttribute("user", user.getId());
         return Result.success(user);
     }
+
+    /**
+     * 用户退出登陆
+     * @param session 删除用户状态
+     * @return
+     */
     @PostMapping("/loginout")
     public Result<String> userLoginout(HttpSession session){
         session.removeAttribute("user");

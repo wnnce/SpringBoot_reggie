@@ -10,14 +10,25 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
+/**
+ * 员工管理
+ */
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
+
+    /**
+     * 员工登陆
+     * @param employee
+     * @param session
+     * @return
+     */
     @PostMapping("/login")
     public Result<Employee> login(@RequestBody Employee employee, HttpSession session){
         String password = employee.getPassword();
+        //对密码进行md5加密
         password = DigestUtils.md5DigestAsHex(password.getBytes());
         Employee emp = employeeService.getEmployeeByUserName(employee.getUsername());
         if (emp == null){
@@ -29,22 +40,45 @@ public class EmployeeController {
         if (emp.getStatus() == 0){
             return Result.error("账号已禁用");
         }
+        //将登陆的员工id保存到session
         session.setAttribute("employee", emp.getId());
         return Result.success(emp);
     }
+
+    /**
+     * 员工退出登陆
+     * @param session
+     * @return
+     */
     @PostMapping("/logout")
     public Result<String> logout(HttpSession session){
         session.removeAttribute("employee");
         return Result.success("用户退出");
     }
+
+    /**
+     * 获取员工分页信息
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @param name 搜索关键字
+     * @return
+     */
     @GetMapping
     public Result<Page<Employee>> page(Integer page, Integer pageSize, String name){
         Page<Employee> pageInfo = employeeService.findEmployee(page, pageSize, name);
         return Result.success(pageInfo);
     }
+
+    /**
+     * 添加员工
+     * @param employee
+     * @param session
+     * @return
+     */
     @PostMapping
     public Result<String> addEmployee(@RequestBody Employee employee, HttpSession session){
         Long empId =(Long) session.getAttribute("employee");
+        //默认密码123456
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
 //        employee.setCreateTime(LocalDateTime.now());
 //        employee.setUpdateTime(LocalDateTime.now());
@@ -53,6 +87,13 @@ public class EmployeeController {
         employeeService.save(employee);
         return Result.success("保存成功！");
     }
+
+    /**
+     * 更新员工信息
+     * @param employee
+     * @param session
+     * @return
+     */
     @PutMapping
     public Result<String> updateEmployee(@RequestBody Employee employee, HttpSession session){
         Long empId = (Long) session.getAttribute("employee");
@@ -61,6 +102,12 @@ public class EmployeeController {
         employeeService.updateById(employee);
         return Result.success("更新成功！");
     }
+
+    /**
+     * 根据id获取员工到详细信息
+     * @param empId
+     * @return
+     */
     @GetMapping("/{id}")
     public Result<Employee> getEmployee(@PathVariable("id") String empId){
         Employee employee = employeeService.getById(empId);
