@@ -11,8 +11,8 @@ import com.aliyun.teautil.models.RuntimeOptions;
  * 阿里云邮件推送
  */
 public class AliyunEmailCode {
-    private static final String accessKeyId = "LTAI5t9ivLkyxRSqF8rLo1J3";
-    private static final String accessKeySecret = "xEEvK3UWFNrb8tW5FdvbzuGdfDWFkg";
+    private static final String accessKeyId = "";
+    private static final String accessKeySecret = "";
     /**
      * 使用AK&SK初始化账号Client
      * @return Client
