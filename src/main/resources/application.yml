@@ -9,13 +9,13 @@ spring:
       master:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: 'jdbc:mysql://localhost:3307/reggie'
+        url: 'jdbc:mysql://10.10.10.120:3307/reggie'
         username: root
         password: admin
       slave:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: 'jdbc:mysql://localhost:3308/reggie'
+        url: 'jdbc:mysql://10.10.10.120:3308/reggie'
         username: root
         password: admin
     props:
@@ -38,8 +38,8 @@ spring:
   redis:
     database: 0
     port: 6379
-    password:
-    host: localhost
+    password: 00000...
+    host: 120.46.151.166
   cache:
     redis:
       time-to-live: 3600000
