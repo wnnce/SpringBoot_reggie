@@ -10,4 +10,5 @@ public interface OrdersService extends IService<Orders> {
     void submit(Orders orders);
     Page<OrdersDTO> getOrdersPage(QueryDTO queryDTO);
     void updateOrdersStatus(Orders orders);
+    void orderAgain(Orders orders);
 }

@@ -35,12 +35,13 @@ public class UserController {
         String email = (String) map.get("email");
         String code = StringUtil.makeCode();
         if (email != null){
-            try{
-                //阿里云发送邮箱验证码
-                AliyunEmailCode.main(email, code);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+//            try{
+//                //阿里云发送邮箱验证码
+//                AliyunEmailCode.main(email, code);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+            log.info(code);
             /*
             将验证码保存到session
             session.setAttribute(email, code);

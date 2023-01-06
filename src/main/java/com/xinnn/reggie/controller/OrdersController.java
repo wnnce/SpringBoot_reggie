@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 订单
@@ -74,5 +76,20 @@ public class OrdersController {
     public Result<String> updateOrderStatus(@RequestBody Orders orders){
         ordersService.updateOrdersStatus(orders);
         return Result.success("更新成功");
+    }
+    @PostMapping("/again")
+    public Result<String> orderAgain(@RequestBody Orders orders){
+        if (orders.getId() != null){
+            orders = ordersService.getById(orders.getId());
+            Long userId = BaseContext.getCurrentUserId();
+            if (userId.equals(orders.getUserId())){
+                ordersService.orderAgain(orders);
+                return Result.success("ok");
+            }else {
+                return Result.error("订单用户信息错误");
+            }
+
+        }
+        return Result.error("订单为空");
     }
 }

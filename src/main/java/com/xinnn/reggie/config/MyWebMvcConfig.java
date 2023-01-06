@@ -30,10 +30,10 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginCheckInterceptor)
                 .addPathPatterns("/employee/**", "/dish/**", "/setmeal/**", "/category/**", "/order/**")
                 .excludePathPatterns("/employee/login", "/dish/list", "/setmeal/list",
-                        "/category/list", "/order/submit", "/order/userPage");
+                        "/category/list", "/order/submit", "/order/userPage", "/order/again");
         //用户登陆拦截器配置
         registry.addInterceptor(userLoginInterceptor)
-                .addPathPatterns("/user/**", "/addressBook/**", "/shoppingCart/**", "/order/submit", "/order/userPage")
+                .addPathPatterns("/user/**", "/addressBook/**", "/shoppingCart/**", "/order/submit", "/order/userPage", "/order/again")
                 .excludePathPatterns("/user/login", "/user/sendMsg");
     }
 

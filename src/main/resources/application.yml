@@ -19,7 +19,7 @@ spring:
         username: root
         password: admin
     props:
-      sql-show: true
+      sql-show: false
     rules:
       readwrite-splitting:
         load-balancers:
