@@ -1,5 +1,6 @@
 package com.xinnn.reggie.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xinnn.reggie.pojo.Employee;
 import com.xinnn.reggie.service.EmployeeService;
@@ -22,11 +23,10 @@ public class EmployeeController {
     /**
      * 员工登陆
      * @param employee
-     * @param session
      * @return
      */
     @PostMapping("/login")
-    public Result<Employee> login(@RequestBody Employee employee, HttpSession session){
+    public Result<Employee> login(@RequestBody Employee employee){
         String password = employee.getPassword();
         //对密码进行md5加密
         password = DigestUtils.md5DigestAsHex(password.getBytes());
@@ -41,18 +41,20 @@ public class EmployeeController {
             return Result.error("账号已禁用");
         }
         //将登陆的员工id保存到session
-        session.setAttribute("employee", emp.getId());
+        StpUtil.login(emp.getId());
+        StpUtil.getSession().set("empId", emp.getId());
         return Result.success(emp);
     }
 
     /**
      * 员工退出登陆
-     * @param session
      * @return
      */
     @PostMapping("/logout")
-    public Result<String> logout(HttpSession session){
-        session.removeAttribute("employee");
+    public Result<String> logout(){
+        Long empId = StpUtil.getSession().getLong("empId");
+        StpUtil.logout(empId);
+        StpUtil.getSession().delete("empId");
         return Result.success("用户退出");
     }
 
@@ -72,12 +74,11 @@ public class EmployeeController {
     /**
      * 添加员工
      * @param employee
-     * @param session
      * @return
      */
     @PostMapping
-    public Result<String> addEmployee(@RequestBody Employee employee, HttpSession session){
-        Long empId =(Long) session.getAttribute("employee");
+    public Result<String> addEmployee(@RequestBody Employee employee){
+        Long empId = StpUtil.getSession().getLong("empId");
         //默认密码123456
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
 //        employee.setCreateTime(LocalDateTime.now());
@@ -91,12 +92,11 @@ public class EmployeeController {
     /**
      * 更新员工信息
      * @param employee
-     * @param session
      * @return
      */
     @PutMapping
-    public Result<String> updateEmployee(@RequestBody Employee employee, HttpSession session){
-        Long empId = (Long) session.getAttribute("employee");
+    public Result<String> updateEmployee(@RequestBody Employee employee){
+        Long empId = StpUtil.getSession().getLong("empId");
 //        employee.setUpdateUser(empId);
 //        employee.setUpdateTime(LocalDateTime.now());
         employeeService.updateById(employee);

@@ -1,7 +1,9 @@
 package com.xinnn.reggie.config;
 
-import com.xinnn.reggie.interceptor.EmployeeLoginInterceptor;
-import com.xinnn.reggie.interceptor.UserLoginInterceptor;
+import cn.dev33.satoken.interceptor.SaInterceptor;
+import cn.dev33.satoken.router.SaRouter;
+import cn.dev33.satoken.stp.StpUtil;
+import com.xinnn.reggie.base.ReggieException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -24,17 +26,23 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        EmployeeLoginInterceptor loginCheckInterceptor = new EmployeeLoginInterceptor();
-        UserLoginInterceptor userLoginInterceptor = new UserLoginInterceptor();
-        //员工登陆拦截器配置
-        registry.addInterceptor(loginCheckInterceptor)
-                .addPathPatterns("/employee/**", "/dish/**", "/setmeal/**", "/category/**", "/order/**")
-                .excludePathPatterns("/employee/login", "/dish/list", "/setmeal/list",
-                        "/category/list", "/order/submit", "/order/userPage");
-        //用户登陆拦截器配置
-        registry.addInterceptor(userLoginInterceptor)
-                .addPathPatterns("/user/**", "/addressBook/**", "/shoppingCart/**", "/order/submit", "/order/userPage")
-                .excludePathPatterns("/user/login", "/user/sendMsg");
+        //使用Sa-Token的多账号鉴权进行登陆验证
+        registry.addInterceptor(new SaInterceptor(handler -> {
+            SaRouter.match("/employee/**", "/dish/**", "/setmeal/**", "/category/**", "/order/**")
+                    .notMatch("/dish/list", "/setmeal/list", "/category/list","/employee/login",
+                            "/order/submit", "/order/userPage", "/order/again")
+                    .check(r -> StpUtil.checkLogin());
+            SaRouter.match("/user/**", "/addressBook/**", "/shoppingCart/**", "/order/submit",
+                    "/order/userPage", "/order/again")
+                    .notMatch("/user/login", "/user/sendMsg")
+                    .check(r -> StpUserUtil.checkLogin());
+            SaRouter.match("/dish/list", "/setmeal/list", "/category/list")
+                    .check(r -> {
+                        if (!StpUtil.isLogin() && !StpUserUtil.isLogin()){
+                            throw new ReggieException("NOTLOGIN");
+                        }
+                    });
+        }).isAnnotation(false));
     }
 
     @Override

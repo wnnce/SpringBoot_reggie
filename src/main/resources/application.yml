@@ -19,7 +19,7 @@ spring:
         username: root
         password: admin
     props:
-      sql-show: true
+      sql-show: false
     rules:
       readwrite-splitting:
         load-balancers:
@@ -51,3 +51,9 @@ mybatis-plus:
         id-type: ASSIGN_ID
 file-save:
   path: /Users/lisang/Documents/imgs/
+sa-token:
+  token-name: reggie
+  timeout: 259200
+  is-concurrent: false
+  token-style: uuid
+  is-log: false

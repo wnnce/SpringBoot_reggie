@@ -31,6 +31,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Autowired
     private ShoppingCartService shoppingCartService;
     @Autowired
+    private DishService dishService;
+    @Autowired
+    private ComboService comboService;
+    @Autowired
     private UserService userService;
 
     /**
@@ -118,7 +122,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             queryWrapper.ge(Orders::getCheckoutTime, queryDTO.getBeginTime());
             queryWrapper.le(Orders::getCheckoutTime, queryDTO.getEndTime());
         }
-        queryWrapper.orderByAsc(queryDTO.getUserId() == null, Orders::getCheckoutTime);
+        //按照下单时间从后到前排序
+        queryWrapper.orderByDesc(Orders::getCheckoutTime);
         ordersPage = this.page(ordersPage, queryWrapper);
         BeanUtils.copyProperties(ordersPage, ordersDTOPage, "records");
         List<Orders> ordersList = ordersPage.getRecords();
@@ -145,5 +150,56 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         LambdaUpdateWrapper<Orders> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.set(Orders::getStatus, orders.getStatus()).eq(Orders::getId, orders.getId());
         this.update(updateWrapper);
+    }
+
+    /**
+     * 再来一单
+     * @param orders
+     */
+    @Override
+    public void orderAgain(Orders orders) {
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId, orders.getId());
+        //获取订单详情
+        List<OrderDetail> orderDetailList = orderDetailService.list(queryWrapper);
+        //如果订单详情列表的大小为0的话 说明订单详情为空 抛出异常
+        if (orderDetailList.size() == 0){
+            throw new ReggieException("订单不存在");
+        }
+        //清空当前用户的购物车
+        shoppingCartService.removeShoppingCartByUserId(orders.getUserId());
+        List<ShoppingCart> shoppingCartList = new ArrayList<>();
+        for (OrderDetail orderDetail : orderDetailList){
+            //判断单个订单详情里面是菜品还是套餐
+            if (orderDetail.getDishId() != null){
+                LambdaQueryWrapper<Dish> dishQueryWrapper = new LambdaQueryWrapper<>();
+                dishQueryWrapper.eq(Dish::getId, orderDetail.getDishId()).eq(Dish::getStatus, 1);
+                //根据id和菜品状态判断当前菜品是否被删除或者停售
+                if (dishService.getMap(dishQueryWrapper) == null){
+                    throw new ReggieException("订单中有菜品停售或者被删除了，请重新下单！");
+                }
+            }else {
+                LambdaQueryWrapper<Combo> comboQueryWrapper = new LambdaQueryWrapper<>();
+                comboQueryWrapper.eq(Combo::getId, orderDetail.getSetmealId()).eq(Combo::getStatus, 1);
+                //根据id和套餐状态判断当前套餐是否被删除或者停售
+                if (comboService.getOne(comboQueryWrapper) == null){
+                    throw new ReggieException("订单中有套餐停售或者被删除了，请重新下单！");
+                }
+            }
+            //从订单详情中获取信息封装到购物车项
+            ShoppingCart shoppingCart = new ShoppingCart();
+            shoppingCart.setUserId(orders.getUserId());
+            shoppingCart.setAmount(orderDetail.getAmount());
+            shoppingCart.setNumber(orderDetail.getNumber());
+            shoppingCart.setImage(orderDetail.getImage());
+            shoppingCart.setName(orderDetail.getName());
+            shoppingCart.setDishId(orderDetail.getDishId());
+            shoppingCart.setSetmealId(orderDetail.getSetmealId());
+            shoppingCart.setDishFlavor(orderDetail.getDishFlavor());
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            shoppingCartList.add(shoppingCart);
+        }
+        //批量保存
+        shoppingCartService.saveBatch(shoppingCartList);
     }
 }

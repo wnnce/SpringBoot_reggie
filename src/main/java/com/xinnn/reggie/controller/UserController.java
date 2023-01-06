@@ -1,5 +1,8 @@
 package com.xinnn.reggie.controller;
 
+import cn.dev33.satoken.session.SaSession;
+import cn.dev33.satoken.stp.StpUtil;
+import com.xinnn.reggie.config.StpUserUtil;
 import com.xinnn.reggie.pojo.User;
 import com.xinnn.reggie.service.UserService;
 import com.xinnn.reggie.utils.AliyunEmailCode;
@@ -35,12 +38,13 @@ public class UserController {
         String email = (String) map.get("email");
         String code = StringUtil.makeCode();
         if (email != null){
-            try{
-                //阿里云发送邮箱验证码
-                AliyunEmailCode.main(email, code);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+//            try{
+//                //阿里云发送邮箱验证码
+//                AliyunEmailCode.main(email, code);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+            log.info(code);
             /*
             将验证码保存到session
             session.setAttribute(email, code);
@@ -56,11 +60,10 @@ public class UserController {
     /**
      * 移动端用户登陆方法
      * @param map 获取用户的email地址和验证码
-     * @param session 保存用户信息
      * @return
      */
     @PostMapping("/login")
-    public Result<User> login(@RequestBody Map<String, Object> map, HttpSession session){
+    public Result<User> login(@RequestBody Map<String, Object> map){
         String email = (String) map.get("phone");
         String userCode = (String) map.get("code");
         //从session中获取验证码
@@ -84,18 +87,20 @@ public class UserController {
         //session.removeAttribute(email);
         //从redis中删除验证码
         redisUtil.remove(RedisUtil.REGGIE_KEY + email);
-        session.setAttribute("user", user.getId());
+        StpUserUtil.login(user.getId());
+        StpUserUtil.getSession().set("userId", user.getId());
         return Result.success(user);
     }
 
     /**
      * 用户退出登陆
-     * @param session 删除用户状态
      * @return
      */
     @PostMapping("/loginout")
-    public Result<String> userLoginout(HttpSession session){
-        session.removeAttribute("user");
+    public Result<String> userLoginout(){
+        Long id = StpUserUtil.getSession().getLong("userId");
+        StpUserUtil.logout(id);
+        StpUserUtil.getSession().delete("userId");
         return Result.success("退出登陆成功");
     }
 }
