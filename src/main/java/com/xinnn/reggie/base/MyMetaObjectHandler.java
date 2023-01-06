@@ -1,7 +1,7 @@
 package com.xinnn.reggie.base;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import com.xinnn.reggie.utils.BaseContext;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class MyMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
-        //从本地线程获取员工ID
-        Long empId = BaseContext.getCurrentUserId();
+        //从Sa-Token同获取登陆的员工Id
+        Long empId = StpUtil.getSession().getLong("empId");
         metaObject.setValue("createTime", LocalDateTime.now());
         metaObject.setValue("updateTime", LocalDateTime.now());
         metaObject.setValue("createUser", empId);
@@ -24,8 +24,8 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        //从本地线程获取用户ID
-        Long empId = BaseContext.getCurrentUserId();
+        //从Sa-Token同获取登陆的员工Id
+        Long empId = StpUtil.getSession().getLong("empId");
         metaObject.setValue("updateTime", LocalDateTime.now());
         metaObject.setValue("updateUser", empId);
     }

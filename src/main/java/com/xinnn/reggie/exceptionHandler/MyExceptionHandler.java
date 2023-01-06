@@ -1,5 +1,6 @@
 package com.xinnn.reggie.exceptionHandler;
 
+import cn.dev33.satoken.exception.NotLoginException;
 import com.xinnn.reggie.base.ReggieException;
 import com.xinnn.reggie.utils.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -34,5 +35,10 @@ public class MyExceptionHandler {
     public Result<String> reggieExceptionHandler(ReggieException ex){
         //给客户端返回异常消息
         return Result.error(ex.getMessage());
+    }
+    @ExceptionHandler(NotLoginException.class)
+    @ResponseBody
+    public Result<String> NotLoginExceptionHandler(NotLoginException ex){
+        return Result.error("NOTLOGIN");
     }
 }

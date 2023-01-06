@@ -1,14 +1,13 @@
 package com.xinnn.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xinnn.reggie.config.StpUserUtil;
 import com.xinnn.reggie.pojo.AddressBook;
 import com.xinnn.reggie.service.AddressBookService;
-import com.xinnn.reggie.utils.BaseContext;
 import com.xinnn.reggie.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -23,12 +22,11 @@ public class AddressBookController {
 
     /**
      * 根据用户ID获取所有收货地址
-     * @param session 获取用户信息
      * @return
      */
     @GetMapping("/list")
-    public Result<List<AddressBook>> addressBookList(HttpSession session){
-        Long userId = (Long) session.getAttribute("user");
+    public Result<List<AddressBook>> addressBookList(){
+        Long userId = StpUserUtil.getSession().getLong("userId");
         //查询条件 根据userId查询
         LambdaQueryWrapper<AddressBook> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(AddressBook::getUserId, userId);
@@ -44,7 +42,7 @@ public class AddressBookController {
      */
     @PostMapping
     public Result<String> addAddressBook(@RequestBody AddressBook addressBook){
-        Long userId = BaseContext.getCurrentUserId();
+        Long userId = StpUserUtil.getSession().getLong("userId");
         //为收货地址设置userId 然后调用save方法保存
         addressBook.setUserId(userId);
         addressBookService.save(addressBook);
@@ -58,7 +56,7 @@ public class AddressBookController {
     @PutMapping("/default")
     public Result<String> updateDefault(@RequestBody Map<String, Long> map){
         Long id = map.get("id");
-        Long userId = BaseContext.getCurrentUserId();
+        Long userId = StpUserUtil.getSession().getLong("userId");
         //获取到地址ID和用户ID后 调用方法
         addressBookService.updateDefaultAddressBook(id, userId);
         return Result.success("ok");
@@ -70,8 +68,8 @@ public class AddressBookController {
      */
     @GetMapping("/default")
     public Result<AddressBook> getDefaultAddressBook(){
-        //有拦截器 直接从本地线程中获取用户ID
-        Long userId = BaseContext.getCurrentUserId();
+        //从SaSession中获取用户id
+        Long userId = StpUserUtil.getSession().getLong("userId");
         //调用service方法
         AddressBook addressBook = addressBookService.getDefaultAddressBookByUserId(userId);
         return Result.success(addressBook);

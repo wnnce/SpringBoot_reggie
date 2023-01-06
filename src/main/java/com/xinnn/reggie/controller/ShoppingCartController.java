@@ -1,8 +1,8 @@
 package com.xinnn.reggie.controller;
 
+import com.xinnn.reggie.config.StpUserUtil;
 import com.xinnn.reggie.pojo.ShoppingCart;
 import com.xinnn.reggie.service.ShoppingCartService;
-import com.xinnn.reggie.utils.BaseContext;
 import com.xinnn.reggie.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ public class ShoppingCartController {
      */
     @GetMapping("/list")
     public Result<List<ShoppingCart>> shoppingCartList(){
-        Long userId = BaseContext.getCurrentUserId();
+        Long userId = StpUserUtil.getSession().getLong("userId");
         List<ShoppingCart> shoppingCartList = shoppingCartService.getShoppingCartListByUserId(userId);
         return Result.success(shoppingCartList);
     }
@@ -36,7 +36,7 @@ public class ShoppingCartController {
      */
     @PostMapping("/add")
     public Result<ShoppingCart> addShoppingCart(@RequestBody ShoppingCart shoppingCart){
-        Long userId = BaseContext.getCurrentUserId();
+        Long userId = StpUserUtil.getSession().getLong("userId");
         shoppingCart.setUserId(userId);
         //购物车总存在该物品则数量加一 不存在则添加
         shoppingCart = shoppingCartService.addAndUpdateShoppingCartNumber(shoppingCart);
@@ -50,7 +50,7 @@ public class ShoppingCartController {
      */
     @PostMapping("/sub")
     public Result<ShoppingCart> subShoppingCart(@RequestBody ShoppingCart shoppingCart){
-        Long userId = BaseContext.getCurrentUserId();
+        Long userId = StpUserUtil.getSession().getLong("userId");
         shoppingCart.setUserId(userId);
         shoppingCart = shoppingCartService.subShoppingCart(shoppingCart);
         return Result.success(shoppingCart);
@@ -62,7 +62,7 @@ public class ShoppingCartController {
      */
     @DeleteMapping("/clean")
     public Result<String> cleanShoppingCart(){
-        Long userId = BaseContext.getCurrentUserId();
+        Long userId = StpUserUtil.getSession().getLong("userId");
         shoppingCartService.removeShoppingCartByUserId(userId);
         return Result.success("ok");
     }
