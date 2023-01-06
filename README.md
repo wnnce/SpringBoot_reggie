@@ -1,0 +1,4 @@
+# SpringBoot瑞吉外卖项目
+项目后端使用SpringBoot框架、MyBatisPlus作为持久层框架、Redis做缓存、Sa-Token做鉴权处理、ShardingSphere做读写分离，数据库使用Mysql，前端页面使用Vue实现。
+
+已经实现项目全部功能，包括读写分离和多账户鉴权。前端页面目前还是在resource文件夹内，需要到话可以拷贝出来使用Nginx实现前后端单独部署。
