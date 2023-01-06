@@ -28,6 +28,7 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         //使用Sa-Token的多账号鉴权进行登陆验证
         registry.addInterceptor(new SaInterceptor(handler -> {
+            //拦截路径 放行路径 使用什么进行鉴权
             SaRouter.match("/employee/**", "/dish/**", "/setmeal/**", "/category/**", "/order/**")
                     .notMatch("/dish/list", "/setmeal/list", "/category/list","/employee/login",
                             "/order/submit", "/order/userPage", "/order/again")
@@ -42,6 +43,7 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
                             throw new ReggieException("NOTLOGIN");
                         }
                     });
+            //关闭注解鉴权支持
         }).isAnnotation(false));
     }
 

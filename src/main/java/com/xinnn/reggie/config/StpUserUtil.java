@@ -12,7 +12,7 @@ import cn.dev33.satoken.stp.StpLogic;
 import java.util.List;
 
 /**
- * 多账户认证 默认多StpUtil鉴权管理员账户 自定义的StpUserUtil鉴权User账户
+ * 多账户认证 默认的StpUtil鉴权管理员账户 自定义的StpUserUtil鉴权User账户
  */
 public class StpUserUtil {
     public static final String TYPE = "user";

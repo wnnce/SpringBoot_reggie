@@ -38,12 +38,12 @@ public class UserController {
         String email = (String) map.get("email");
         String code = StringUtil.makeCode();
         if (email != null){
-//            try{
-//                //阿里云发送邮箱验证码
-//                AliyunEmailCode.main(email, code);
-//            }catch (Exception e){
-//                e.printStackTrace();
-//            }
+            try{
+                //阿里云发送邮箱验证码
+                AliyunEmailCode.main(email, code);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             log.info(code);
             /*
             将验证码保存到session
@@ -87,7 +87,9 @@ public class UserController {
         //session.removeAttribute(email);
         //从redis中删除验证码
         redisUtil.remove(RedisUtil.REGGIE_KEY + email);
+        //调用登陆方法 生成当前用户的唯一token用作鉴权
         StpUserUtil.login(user.getId());
+        //将userId保存到session 方便获取
         StpUserUtil.getSession().set("userId", user.getId());
         return Result.success(user);
     }
@@ -99,7 +101,9 @@ public class UserController {
     @PostMapping("/loginout")
     public Result<String> userLoginout(){
         Long id = StpUserUtil.getSession().getLong("userId");
+        //根据id退出登陆
         StpUserUtil.logout(id);
+        //从session中移除
         StpUserUtil.getSession().delete("userId");
         return Result.success("退出登陆成功");
     }

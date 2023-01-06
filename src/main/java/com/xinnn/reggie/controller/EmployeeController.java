@@ -78,7 +78,6 @@ public class EmployeeController {
      */
     @PostMapping
     public Result<String> addEmployee(@RequestBody Employee employee){
-        Long empId = StpUtil.getSession().getLong("empId");
         //默认密码123456
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
 //        employee.setCreateTime(LocalDateTime.now());
@@ -96,7 +95,6 @@ public class EmployeeController {
      */
     @PutMapping
     public Result<String> updateEmployee(@RequestBody Employee employee){
-        Long empId = StpUtil.getSession().getLong("empId");
 //        employee.setUpdateUser(empId);
 //        employee.setUpdateTime(LocalDateTime.now());
         employeeService.updateById(employee);
